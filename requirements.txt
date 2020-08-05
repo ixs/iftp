@@ -1,0 +1,1 @@
+-e git+https://github.com/ixs/pyicloud.git@drive_ops#egg=pyicloud
