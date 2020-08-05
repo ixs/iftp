@@ -101,6 +101,35 @@ class Iftp(cmd.Cmd):
             print("550 Failed to open file.")
         return
 
+    def do_put(self, args):
+        """Download file"""
+        if not self.check_login():
+            print("Not logged in, login first")
+            return
+
+        args = shlex.split(args)
+        if len(args) == 1:
+            sfile = args[0]
+            dfile = os.path.basename(sfile)
+        else:
+            (sfile, dfile) = args
+
+        head, tail = os.path.split(dfile)
+        if head:
+             drive_handle = self._get_handle_for_path(os.path.normpath(os.path.join(self.user_path, head)))
+        else:
+             drive_handle = self._get_handle_for_path(self.user_path)
+
+        if drive_handle and drive_handle.type == 'folder':
+            size = os.path.getsize(sfile)
+            starttime = time.time()
+            with open(sfile, 'rb') as file_in:
+                drive_handle.upload(file_in)
+            stoptime = time.time()
+            duration = stoptime - starttime
+            print("%s bytes sent in %f secs (%f Kbytes/sec)" % (size, duration, size / duration / 1024))
+        return
+
     def do_mkdir(self, args):
         """Create new directory"""
         if not self.check_login():
